@@ -175,6 +175,12 @@ public class RegistrationScreen extends JFrame {
         panel.add(typeBox, "wrap, width 350!, height 45!, gapbottom 40");
         panel.add(registerBtn, "wrap, width 350!, height 50!");
         
-        add(panel);
+        JScrollPane scrollPane = new JScrollPane(panel);
+        scrollPane.setBorder(null);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+        
+        add(scrollPane);
     }
 }
