@@ -10,7 +10,7 @@ public class VaultXApp {
         SwingUtilities.invokeLater(() -> {
             // Setup Modern Look and Feel
             ThemeManager.setup();
-            
+
             // Show Login Screen
             LoginScreen loginScreen = new LoginScreen();
             loginScreen.setVisible(true);

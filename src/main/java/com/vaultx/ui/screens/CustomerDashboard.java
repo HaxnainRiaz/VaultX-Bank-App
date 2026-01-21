@@ -23,7 +23,7 @@ public class CustomerDashboard extends JFrame {
     private final BankingService bankingService = new BankingService();
     private final CardLayout cardLayout = new CardLayout();
     private final JPanel contentCards = new JPanel(cardLayout);
-    
+
     private final JLabel balanceLabel = new JLabel("Rs. 0.00");
     private boolean balanceVisible = true;
     private final JTable statementTable = new JTable();
@@ -41,23 +41,26 @@ public class CustomerDashboard extends JFrame {
 
         // Initialize tables with default structure
         DefaultTableModel emptyModel = new DefaultTableModel(
-            new Object[][]{},
-            new String[]{"Date", "Detail", "Type", "Amount"}
-        ) {
+                new Object[][] {},
+                new String[] { "Date", "Detail", "Type", "Amount" }) {
             @Override
-            public boolean isCellEditable(int row, int column) { return false; }
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
         };
-        
+
         statementTable.setModel(emptyModel);
         statementTable.setRowHeight(35);
-        
-        // Use a separate model instance for recent activity to avoid shared state issues
+
+        // Use a separate model instance for recent activity to avoid shared state
+        // issues
         recentActivityTable.setModel(new DefaultTableModel(
-            new Object[][]{},
-            new String[]{"Date", "Detail", "Type", "Amount"}
-        ) {
+                new Object[][] {},
+                new String[] { "Date", "Detail", "Type", "Amount" }) {
             @Override
-            public boolean isCellEditable(int row, int column) { return false; }
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
         });
         recentActivityTable.setRowHeight(35);
 
@@ -65,12 +68,12 @@ public class CustomerDashboard extends JFrame {
 
         JPanel mainContainer = new JPanel(new MigLayout("fill, insets 0", "[240!]0[fill]", "fill"));
         mainContainer.add(createSidebar(), "growy");
-        
+
         setupContentCards();
         mainContainer.add(contentCards, "grow");
 
         add(mainContainer);
-        
+
         // Refresh UI after everything is set up
         SwingUtilities.invokeLater(() -> refreshUI());
     }
@@ -79,7 +82,9 @@ public class CustomerDashboard extends JFrame {
         try {
             User u = SessionManager.getInstance().getCurrentUser();
             currentAccount = bankingService.getAccountByUserId(u.getEmail());
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void setupContentCards() {
@@ -94,19 +99,19 @@ public class CustomerDashboard extends JFrame {
     private JPanel createSidebar() {
         JPanel sidebar = new JPanel(new MigLayout("fill, insets 25", "fill", "[]50[]15[]15[]15[]15[]15[]push[]"));
         sidebar.setBackground(ThemeManager.SURFACE);
-        
+
         JLabel logo = new JLabel("VaultX");
         logo.setFont(new Font("Inter", Font.BOLD, 26));
         logo.setForeground(ThemeManager.PRIMARY);
         sidebar.add(logo, "wrap, gapbottom 40");
-        
+
         String[][] menu = {
-            {"Overview", "DASHBOARD"}, 
-            {"Payments", "PAYMENTS"}, 
-            {"e-Statements", "STATEMENTS"},
-            {"Spending", "ANALYTICS"},
-            {"Help Center", "SUPPORT"},
-            {"Profile", "PROFILE"}
+                { "Overview", "DASHBOARD" },
+                { "Payments", "PAYMENTS" },
+                { "e-Statements", "STATEMENTS" },
+                { "Spending", "ANALYTICS" },
+                { "Help Center", "SUPPORT" },
+                { "Profile", "PROFILE" }
         };
         for (String[] itm : menu) {
             JButton b = new JButton(itm[0]);
@@ -121,29 +126,35 @@ public class CustomerDashboard extends JFrame {
                 setActiveMenu(b);
             });
             sidebar.add(b, "wrap, height 40!");
-            
+
             // Set Overview as default active
             if ("DASHBOARD".equals(itm[1])) {
                 activeMenuButton = b;
                 b.setFont(new Font("Inter", Font.BOLD, 15));
                 b.setForeground(ThemeManager.PRIMARY);
                 b.setOpaque(true);
-                b.setBackground(new Color(ThemeManager.PRIMARY.getRed(), ThemeManager.PRIMARY.getGreen(), ThemeManager.PRIMARY.getBlue(), 30));
+                b.setBackground(new Color(ThemeManager.PRIMARY.getRed(), ThemeManager.PRIMARY.getGreen(),
+                        ThemeManager.PRIMARY.getBlue(), 30));
             }
         }
-        
+
         ModernButton logout = new ModernButton("Sign Out", ModernButton.Type.SECONDARY);
-        logout.addActionListener(e -> { new LoginScreen().setVisible(true); this.dispose(); });
-        
+        logout.addActionListener(e -> {
+            new LoginScreen().setVisible(true);
+            this.dispose();
+        });
+
         ModernButton shutdown = new ModernButton("⏻ Shutdown", ModernButton.Type.SECONDARY);
         shutdown.addActionListener(e -> {
-            int confirm = JOptionPane.showConfirmDialog(this, "Are you sure you want to exit VaultX?", "Confirm Exit", JOptionPane.YES_NO_OPTION);
-            if (confirm == JOptionPane.YES_OPTION) System.exit(0);
+            int confirm = JOptionPane.showConfirmDialog(this, "Are you sure you want to exit VaultX?", "Confirm Exit",
+                    JOptionPane.YES_NO_OPTION);
+            if (confirm == JOptionPane.YES_OPTION)
+                System.exit(0);
         });
-        
+
         sidebar.add(logout, "south, height 40!, gapbottom 10");
         sidebar.add(shutdown, "south, height 40!");
-        
+
         return sidebar;
     }
 
@@ -161,26 +172,27 @@ public class CustomerDashboard extends JFrame {
         pt.setForeground(ThemeManager.TEXT_SECONDARY);
         balanceLabel.setFont(new Font("Inter", Font.BOLD, 38));
         balanceLabel.setForeground(ThemeManager.SUCCESS);
-        
+
         JButton toggleBalance = new JButton("👁");
         toggleBalance.setPreferredSize(new Dimension(40, 40));
         toggleBalance.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 18));
         toggleBalance.addActionListener(e -> {
             balanceVisible = !balanceVisible;
             if (balanceVisible) {
-                balanceLabel.setText(String.format("Rs. %,.2f", currentAccount != null ? currentAccount.getBalance() : 0.0));
+                balanceLabel.setText(
+                        String.format("Rs. %,.2f", currentAccount != null ? currentAccount.getBalance() : 0.0));
                 toggleBalance.setText("👁");
             } else {
                 balanceLabel.setText("••••••••");
                 toggleBalance.setText("🙈");
             }
         });
-        
+
         JPanel balRow = new JPanel(new MigLayout("insets 0", "[][]", "[]"));
         balRow.setOpaque(false);
         balRow.add(balanceLabel);
         balRow.add(toggleBalance, "gapleft 15");
-        
+
         balCard.add(pt, "wrap");
         balCard.add(balRow);
 
@@ -199,7 +211,7 @@ public class CustomerDashboard extends JFrame {
         panel.add(greet, "wrap");
         panel.add(balCard, "growx, wrap, gapbottom 20");
         panel.add(quickActions, "growx, wrap, gapbottom 30");
-        
+
         JPanel recArea = new JPanel(new MigLayout("fill, insets 20", "fill", "[]10[grow]"));
         ThemeManager.applyCardStyle(recArea);
         recArea.add(new JLabel("RECENT ACTIVITY"), "wrap");
@@ -215,7 +227,7 @@ public class CustomerDashboard extends JFrame {
         JPanel card = new JPanel(new MigLayout("fill, insets 35", "[fill]", "[]30[]10[]20[]10[]20[]20[]"));
         ThemeManager.applyCardStyle(card);
         card.setPreferredSize(new Dimension(480, 580));
-        
+
         JLabel t = new JLabel("Fast & Secure Transfer");
         t.setFont(new Font("Inter", Font.BOLD, 22));
         ModernTextField rId = new ModernTextField("Recipient Account ID");
@@ -224,19 +236,33 @@ public class CustomerDashboard extends JFrame {
         rName.setForeground(ThemeManager.PRIMARY);
 
         rId.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
-            public void changedUpdate(javax.swing.event.DocumentEvent e) { lookup(); }
-            public void removeUpdate(javax.swing.event.DocumentEvent e) { lookup(); }
-            public void insertUpdate(javax.swing.event.DocumentEvent e) { lookup(); }
+            public void changedUpdate(javax.swing.event.DocumentEvent e) {
+                lookup();
+            }
+
+            public void removeUpdate(javax.swing.event.DocumentEvent e) {
+                lookup();
+            }
+
+            public void insertUpdate(javax.swing.event.DocumentEvent e) {
+                lookup();
+            }
+
             private void lookup() {
                 String id = rId.getText().trim();
                 new Thread(() -> {
                     try {
                         Account acc = bankingService.getAccountById(id);
-                        if(acc != null) {
-                            User u = bankingService.getAllUsers().stream().filter(usr -> usr.getEmail().equals(acc.getUserId())).findFirst().orElse(null);
-                            SwingUtilities.invokeLater(() -> rName.setText(u != null ? "✓ Recipient: " + u.getFullName() : "Account found"));
-                        } else { SwingUtilities.invokeLater(() -> rName.setText("Account not found")); }
-                    } catch(Exception ex) {}
+                        if (acc != null) {
+                            User u = bankingService.getAllUsers().stream()
+                                    .filter(usr -> usr.getEmail().equals(acc.getUserId())).findFirst().orElse(null);
+                            SwingUtilities.invokeLater(() -> rName
+                                    .setText(u != null ? "✓ Recipient: " + u.getFullName() : "Account found"));
+                        } else {
+                            SwingUtilities.invokeLater(() -> rName.setText("Account not found"));
+                        }
+                    } catch (Exception ex) {
+                    }
                 }).start();
             }
         });
@@ -245,14 +271,36 @@ public class CustomerDashboard extends JFrame {
         ModernTextField note = new ModernTextField("Reference (Optional)");
         ModernButton b = new ModernButton("Execute Payment", ModernButton.Type.PRIMARY);
         b.addActionListener(e -> {
+            String targetId = rId.getText().trim();
+            String amountStr = amt.getText().trim();
+
+            if (targetId.isEmpty()) {
+                Toast.show(this, "Recipient ID is required", Toast.Type.ERROR);
+                return;
+            }
+            if (targetId.equals(currentAccount.getAccountId())) {
+                Toast.show(this, "Cannot transfer to yourself", Toast.Type.ERROR);
+                return;
+            }
+
             try {
-                bankingService.performTransfer(currentAccount.getAccountId(), rId.getText().trim(), Double.parseDouble(amt.getText()), note.getText());
+                double amount = Double.parseDouble(amountStr);
+                if (amount <= 0)
+                    throw new Exception("Amount must be positive");
+                if (amount > currentAccount.getBalance())
+                    throw new Exception("Insufficient balance");
+
+                bankingService.performTransfer(currentAccount.getAccountId(), targetId, amount, note.getText().trim());
                 Toast.show(this, "Payment Dispatched Successfully!", Toast.Type.SUCCESS);
                 refreshUI();
                 cardLayout.show(contentCards, "DASHBOARD");
-            } catch (Exception ex) { Toast.show(this, ex.getMessage(), Toast.Type.ERROR); }
+            } catch (NumberFormatException ex) {
+                Toast.show(this, "Invalid amount format", Toast.Type.ERROR);
+            } catch (Exception ex) {
+                Toast.show(this, ex.getMessage(), Toast.Type.ERROR);
+            }
         });
-        
+
         card.add(t, "wrap");
         card.add(new JLabel("RECIPIENT ACCOUNT ID"), "wrap");
         card.add(rId, "wrap, height 45!");
@@ -283,7 +331,7 @@ public class CustomerDashboard extends JFrame {
         t.setFont(new Font("Inter", Font.BOLD, 24));
         panel.add(t, "wrap");
         panel.add(new JScrollPane(ticketTable), "grow, wrap");
-        
+
         ModernButton newBatch = new ModernButton("Raise New Ticket", ModernButton.Type.PRIMARY);
         newBatch.addActionListener(e -> handleRaiseTicket());
         panel.add(newBatch, "right");
@@ -296,18 +344,28 @@ public class CustomerDashboard extends JFrame {
         JLabel t = new JLabel("Spending & Expense Analytics");
         t.setFont(new Font("Inter", Font.BOLD, 24));
         panel.add(t, "wrap");
-        
-        // Initialize with empty data
+
         spendingDataset.setValue("Transfers", 0);
         spendingDataset.setValue("Withdrawals", 0);
         spendingDataset.setValue("Deposits (Inflow)", 0);
 
-        JFreeChart chart = ChartFactory.createPieChart("Expenditure Breakdown", spendingDataset, true, true, false);
+        JFreeChart chart = ChartFactory.createPieChart(null, spendingDataset, true, true, false);
         chart.setBackgroundPaint(ThemeManager.CARD);
-        
+        chart.getPlot().setBackgroundPaint(ThemeManager.CARD);
+        chart.getPlot().setOutlineVisible(false);
+
+        // Customize chart legend and labels
+        chart.getLegend().setBackgroundPaint(ThemeManager.CARD);
+        chart.getLegend().setItemPaint(ThemeManager.TEXT_SECONDARY);
+
+        ChartPanel chartPanel = new ChartPanel(chart);
+        chartPanel.setPreferredSize(new Dimension(800, 500));
+        chartPanel.setOpaque(false);
+        chartPanel.setBackground(ThemeManager.CARD);
+
         JPanel card = new JPanel(new BorderLayout());
         ThemeManager.applyCardStyle(card);
-        card.add(new ChartPanel(chart));
+        card.add(chartPanel, BorderLayout.CENTER);
         panel.add(card, "grow");
         return panel;
     }
@@ -319,7 +377,7 @@ public class CustomerDashboard extends JFrame {
         JLabel t = new JLabel("Security & Profile");
         t.setFont(new Font("Inter", Font.BOLD, 26));
         panel.add(t, "wrap");
-        
+
         JPanel card = new JPanel(new MigLayout("fill, insets 30", "fill", "[]15[]15[]15[]15[]"));
         ThemeManager.applyCardStyle(card);
         card.add(new JLabel("User ID/Email: " + u.getEmail()), "wrap");
@@ -333,18 +391,25 @@ public class CustomerDashboard extends JFrame {
 
     private void handleDeposit() {
         String val = JOptionPane.showInputDialog(this, "Enter amount to deposit (Rs. ):");
-        if(val != null) {
+        if (val != null && !val.trim().isEmpty()) {
             try {
+                double amount = Double.parseDouble(val.trim());
+                if (amount <= 0) {
+                    Toast.show(this, "Amount must be greater than zero", Toast.Type.ERROR);
+                    return;
+                }
                 boolean isAdmin = "ADMIN".equals(SessionManager.getInstance().getCurrentUser().getRole());
-                bankingService.performDeposit(currentAccount.getAccountId(), Double.parseDouble(val), isAdmin);
+                bankingService.performDeposit(currentAccount.getAccountId(), amount, isAdmin);
                 Toast.show(this, "Funds Deposited Successfully!", Toast.Type.SUCCESS);
                 refreshUI();
-            } catch (Exception ex) { 
-                if(ex.getMessage().contains("Awaiting Admin Approval")) {
+            } catch (NumberFormatException ex) {
+                Toast.show(this, "Invalid amount format", Toast.Type.ERROR);
+            } catch (Exception ex) {
+                if (ex.getMessage().contains("Awaiting Admin Approval")) {
                     Toast.show(this, ex.getMessage(), Toast.Type.INFO);
                     refreshUI();
                 } else {
-                    Toast.show(this, "Error: " + ex.getMessage(), Toast.Type.ERROR); 
+                    Toast.show(this, "Error: " + ex.getMessage(), Toast.Type.ERROR);
                 }
             }
         }
@@ -352,99 +417,140 @@ public class CustomerDashboard extends JFrame {
 
     private void handleWithdraw() {
         String val = JOptionPane.showInputDialog(this, "Enter amount to withdraw (Rs. ):");
-        if(val != null) {
+        if (val != null && !val.trim().isEmpty()) {
             try {
-                bankingService.performWithdrawal(currentAccount.getAccountId(), Double.parseDouble(val));
+                double amount = Double.parseDouble(val.trim());
+                if (amount <= 0) {
+                    Toast.show(this, "Amount must be greater than zero", Toast.Type.ERROR);
+                    return;
+                }
+                if (amount > currentAccount.getBalance()) {
+                    Toast.show(this, "Insufficient balance", Toast.Type.ERROR);
+                    return;
+                }
+                bankingService.performWithdrawal(currentAccount.getAccountId(), amount);
                 Toast.show(this, "Funds Withdrawn Successfully!", Toast.Type.SUCCESS);
                 refreshUI();
-            } catch (Exception ex) { Toast.show(this, ex.getMessage(), Toast.Type.ERROR); }
+            } catch (NumberFormatException ex) {
+                Toast.show(this, "Invalid amount format", Toast.Type.ERROR);
+            } catch (Exception ex) {
+                Toast.show(this, ex.getMessage(), Toast.Type.ERROR);
+            }
         }
     }
 
     private void handleRaiseTicket() {
         String title = JOptionPane.showInputDialog(this, "Issue Title:");
+        if (title == null || title.trim().isEmpty())
+            return;
         String msg = JOptionPane.showInputDialog(this, "Describe the issue:");
-        if(title != null && msg != null) {
-            try {
-                bankingService.createTicket(new SupportTicket(SessionManager.getInstance().getCurrentUser().getEmail(), title, "GENERAL", msg));
-                Toast.show(this, "Ticket submitted to admin", Toast.Type.SUCCESS);
-                refreshUI();
-            } catch (Exception ex) { ex.printStackTrace(); }
+        if (msg == null || msg.trim().isEmpty())
+            return;
+
+        try {
+            bankingService.createTicket(new SupportTicket(SessionManager.getInstance().getCurrentUser().getEmail(),
+                    title.trim(), "GENERAL", msg.trim()));
+            Toast.show(this, "Ticket submitted to admin", Toast.Type.SUCCESS);
+            refreshUI();
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
     }
 
     private void refreshUI() {
         new Thread(() -> {
             try {
-                java.util.concurrent.CompletableFuture<Void> initFuture = java.util.concurrent.CompletableFuture.runAsync(() -> loadInitialData());
+                java.util.concurrent.CompletableFuture<Void> initFuture = java.util.concurrent.CompletableFuture
+                        .runAsync(() -> loadInitialData());
                 initFuture.get(); // Need currentAccount for next calls
 
-                java.util.concurrent.CompletableFuture<List<com.vaultx.models.Transaction>> txsFuture = java.util.concurrent.CompletableFuture.supplyAsync(() -> { try { return bankingService.getTransactions(currentAccount.getAccountId()); } catch(Exception e) { return null; } });
-                java.util.concurrent.CompletableFuture<List<com.vaultx.models.SupportTicket>> tktsFuture = java.util.concurrent.CompletableFuture.supplyAsync(() -> { try { return bankingService.getTicketsForUser(currentAccount.getUserId()); } catch(Exception e) { return null; } });
+                java.util.concurrent.CompletableFuture<List<com.vaultx.models.Transaction>> txsFuture = java.util.concurrent.CompletableFuture
+                        .supplyAsync(() -> {
+                            try {
+                                return bankingService.getTransactions(currentAccount.getAccountId());
+                            } catch (Exception e) {
+                                return null;
+                            }
+                        });
+                java.util.concurrent.CompletableFuture<List<com.vaultx.models.SupportTicket>> tktsFuture = java.util.concurrent.CompletableFuture
+                        .supplyAsync(() -> {
+                            try {
+                                return bankingService.getTicketsForUser(currentAccount.getUserId());
+                            } catch (Exception e) {
+                                return null;
+                            }
+                        });
 
                 List<com.vaultx.models.Transaction> txs = txsFuture.get();
                 List<com.vaultx.models.SupportTicket> tkts = tktsFuture.get();
-                
+
                 SwingUtilities.invokeLater(() -> {
-                    if(currentAccount != null) {
+                    if (currentAccount != null) {
                         if (balanceVisible) {
                             balanceLabel.setText(String.format("Rs. %,.2f", currentAccount.getBalance()));
                         } else {
                             balanceLabel.setText("••••••••");
                         }
                     }
-                    
+
                     SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, HH:mm");
-                    if(txs != null && !txs.isEmpty()) {
+                    if (txs != null && !txs.isEmpty()) {
                         // Update chart data
                         double transfers = 0, withdrawals = 0, deposits = 0;
-                        for(com.vaultx.models.Transaction tx : txs) {
-                            if ("DEPOSIT".equals(tx.getType())) deposits += tx.getAmount();
-                            else if ("WITHDRAWAL".equals(tx.getType())) withdrawals += tx.getAmount();
-                            else if ("TRANSFER".equals(tx.getType())) transfers += tx.getAmount();
+                        for (com.vaultx.models.Transaction tx : txs) {
+                            if ("DEPOSIT".equals(tx.getType()))
+                                deposits += tx.getAmount();
+                            else if ("WITHDRAWAL".equals(tx.getType()))
+                                withdrawals += tx.getAmount();
+                            else if ("TRANSFER".equals(tx.getType()))
+                                transfers += tx.getAmount();
                         }
                         spendingDataset.setValue("Transfers", transfers);
                         spendingDataset.setValue("Withdrawals", withdrawals);
                         spendingDataset.setValue("Deposits (Inflow)", deposits);
-                        
+
                         // Update recent activity table (Limit 10)
-                        String[] tCols = {"Date", "Detail", "Type", "Amount"};
+                        String[] tCols = { "Date", "Detail", "Type", "Amount" };
                         Object[][] recentData = txs.stream()
-                            .limit(10)
-                            .map(t -> {
-                                boolean out = t.getFromAccountId().equals(currentAccount.getAccountId());
-                                return new Object[]{
-                                    sdf.format(new Date(t.getTimestamp())), 
-                                    t.getDescription(), 
-                                    t.getType(), 
-                                    (out?"-":"+")+String.format("Rs. %.2f", t.getAmount())
-                                };
-                            }).toArray(Object[][]::new);
-                        
+                                .limit(10)
+                                .map(t -> {
+                                    boolean out = t.getFromAccountId().equals(currentAccount.getAccountId());
+                                    return new Object[] {
+                                            sdf.format(new Date(t.getTimestamp())),
+                                            t.getDescription(),
+                                            t.getType(),
+                                            (out ? "-" : "+") + String.format("Rs. %.2f", t.getAmount())
+                                    };
+                                }).toArray(Object[][]::new);
+
                         DefaultTableModel recentModel = new DefaultTableModel(recentData, tCols) {
                             @Override
-                            public boolean isCellEditable(int row, int column) { return false; }
+                            public boolean isCellEditable(int row, int column) {
+                                return false;
+                            }
                         };
                         recentActivityTable.setModel(recentModel);
-                        
+
                         // Update full statement table (All Transactions)
                         Object[][] fullData = txs.stream()
-                            .map(t -> {
-                                boolean out = t.getFromAccountId().equals(currentAccount.getAccountId());
-                                return new Object[]{
-                                    sdf.format(new Date(t.getTimestamp())), 
-                                    t.getDescription(), 
-                                    t.getType(), 
-                                    (out?"-":"+")+String.format("Rs. %.2f", t.getAmount())
-                                };
-                            }).toArray(Object[][]::new);
-                            
+                                .map(t -> {
+                                    boolean out = t.getFromAccountId().equals(currentAccount.getAccountId());
+                                    return new Object[] {
+                                            sdf.format(new Date(t.getTimestamp())),
+                                            t.getDescription(),
+                                            t.getType(),
+                                            (out ? "-" : "+") + String.format("Rs. %.2f", t.getAmount())
+                                    };
+                                }).toArray(Object[][]::new);
+
                         DefaultTableModel fullModel = new DefaultTableModel(fullData, tCols) {
                             @Override
-                            public boolean isCellEditable(int row, int column) { return false; }
+                            public boolean isCellEditable(int row, int column) {
+                                return false;
+                            }
                         };
                         statementTable.setModel(fullModel);
-                        
+
                         // Force UI update
                         if (recentActivityTable.getParent() != null) {
                             recentActivityTable.getParent().revalidate();
@@ -456,20 +562,26 @@ public class CustomerDashboard extends JFrame {
                         }
                     }
 
-                    if(tkts != null) {
-                        String[] kCols = {"Ticket ID", "Title", "Status", "Admin Reply"};
-                        Object[][] kData = tkts.stream().map(t -> new Object[]{t.getTicketId(), t.getTitle(), t.getStatus(), t.getAdminReply()}).toArray(Object[][]::new);
+                    if (tkts != null) {
+                        String[] kCols = { "Ticket ID", "Title", "Status", "Admin Reply" };
+                        Object[][] kData = tkts.stream().map(
+                                t -> new Object[] { t.getTicketId(), t.getTitle(), t.getStatus(), t.getAdminReply() })
+                                .toArray(Object[][]::new);
                         ticketTable.setModel(new DefaultTableModel(kData, kCols) {
                             @Override
-                            public boolean isCellEditable(int row, int column) { return false; }
+                            public boolean isCellEditable(int row, int column) {
+                                return false;
+                            }
                         });
                         ticketTable.setRowHeight(35);
                     }
                 });
-            } catch (Exception e) { e.printStackTrace(); }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }).start();
     }
-    
+
     private void setActiveMenu(JButton newActive) {
         // Reset previous active button
         if (activeMenuButton != null) {
@@ -478,12 +590,13 @@ public class CustomerDashboard extends JFrame {
             activeMenuButton.setOpaque(false);
             activeMenuButton.setContentAreaFilled(false);
         }
-        
+
         // Set new active button
         activeMenuButton = newActive;
         newActive.setFont(new Font("Inter", Font.BOLD, 15));
         newActive.setForeground(ThemeManager.PRIMARY);
         newActive.setOpaque(true);
-        newActive.setBackground(new Color(ThemeManager.PRIMARY.getRed(), ThemeManager.PRIMARY.getGreen(), ThemeManager.PRIMARY.getBlue(), 30));
+        newActive.setBackground(new Color(ThemeManager.PRIMARY.getRed(), ThemeManager.PRIMARY.getGreen(),
+                ThemeManager.PRIMARY.getBlue(), 30));
     }
 }
